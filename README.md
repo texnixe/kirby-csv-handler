@@ -10,10 +10,12 @@ Use one of the alternatives below.
 
 If you are using the Kirby CLI, you can install this plugin by running the following commands in your shell:
 
-```
+```text
 $ cd path/to/kirby
 $ kirby plugin:install texnixe/kirby-csv-handler
-``
+```
+
+
 ### 2. Clone or download
 
   - Clone or download this repository.
@@ -21,7 +23,7 @@ $ kirby plugin:install texnixe/kirby-csv-handler
 
 Make sure that the plugin folder structure looks like this:
 
-```
+```text
 site/plugins/kirby-csv-handler/
 ```
 
@@ -29,7 +31,7 @@ site/plugins/kirby-csv-handler/
 
 If you know your way around Git, you can download this plugin as a submodule:
 
-```
+```text
 $ cd path/to/kirby-project
 $ git submodule add https://github.com/texnixe/kirby-csv-handler site/plugins/kirby-csv-handler
 ```
