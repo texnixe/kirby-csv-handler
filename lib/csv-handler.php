@@ -45,7 +45,7 @@ class CsvHandler {
 
     } else {
 
-      $page = page($uri);
+      $page = page($parent);
 
     }
 
