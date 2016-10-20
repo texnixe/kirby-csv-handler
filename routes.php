@@ -12,13 +12,11 @@ kirby()->routes(array(
       if(kirby()->site()->user()) {
 
         // get variable values from config settings, else use defaults
-        $filePath = c::get('csv-handler.filepath', __DIR__ . DS . 'examples/products.csv');
-        $delimiter = c::get('csv-handler.delimiter', ',');
+        $filePath = c::get('csv-handler.file.filepath', __DIR__ . DS . 'examples/products.csv');
+        $delimiter = c::get('csv-handler.file.delimiter', ',');
 
-        $titleField = c::get('csv-handler.titlefield', 'ArticleNo');
-        $template = c::get('csv-handler.template', 'default');
-
-
+        $titleField = c::get('csv-handler.page.uid', 'ArticleNo');
+        $template = c::get('csv-handler.page.template', 'default');
         $update = c::get('csv-handler.page.update', false);
 
         try {
@@ -71,11 +69,11 @@ kirby()->routes(array(
       if(kirby()->site()->user()) {
 
         // get variable values from config settings, else use defaults
-        $filePath = c::get('csv-handler.filepath', __DIR__ . DS . 'examples/products.csv');
-        $delimiter = c::get('csv-handler.delimiter', ',');
+        $filePath = c::get('csv-handler.file.filepath', __DIR__ . DS . 'examples/products.csv');
+        $delimiter = c::get('csv-handler.file.delimiter', ',');
 
         $field = c::get('csv-handler.structure.field', 'items');
-        $update = c::get('csv-handler.page.append', false);
+        $update = c::get('csv-handler.structure.append', false);
 
         // try to instatiate an CsvHandler object
         try {
