@@ -96,3 +96,11 @@ where `(:all)` is the path to the parent page (in case of subpage creation)/page
 For example, the URL `http://example.com/csv-handler.createpages/products` will create subpages in `/content/products`, while `http://example.com/csv-handler.createstructure/products` will create/update the structure field in `/content/products`.
 
 You must be logged in to use the routes.
+
+## License
+
+http://www.opensource.org/licenses/mit-license.php
+
+## Authors
+
+Sonja Broda https://www.texniq.de
