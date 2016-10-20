@@ -1,44 +1,121 @@
 <?php
 
 kirby()->routes(array(
-	array(
-		'pattern' => 'csv-handler/createpages/(:all)',
-		'action' => function ($uri) {
+  array(
+    'pattern' => 'csv-handler/createpages/(:all)',
+    'action' => function ($uri) {
 
-			if(kirby()->site()->user()) {
+      $messages = array();
 
-				$filePath = c::get('csv-handler.filepath');
-				$titleField = c::get('csv-handler.titlefield');
-				$template = c::get('csv-handler.template', 'default');
+      // check if user is logged in
+      // @TODO: check permissions for Kirby 2.4.0
+      if(kirby()->site()->user()) {
 
-				$delimiter = c::get('csv-handler.delimiter', ',');
-				$update = c::get('csv-handler.page.update', false);
+        // get variable values from config settings, else use defaults
+        $filePath = c::get('csv-handler.filepath', __DIR__ . DS . 'examples/products.csv');
+        $delimiter = c::get('csv-handler.delimiter', ',');
 
-				try {
-					$csvFile = new SonjaBroda\CsvHandler($filePath, true, $delimiter);
+        $titleField = c::get('csv-handler.titlefield', 'ArticleNo');
+        $template = c::get('csv-handler.template', 'default');
 
-				} catch (Exception $e) {
-					echo $e->getMessage();
 
-				}
+        $update = c::get('csv-handler.page.update', false);
 
-				if(isset($csvFile)) {
+        try {
 
-					try {
+          $csvFile = new SonjaBroda\CsvHandler($filePath, true, $delimiter);
 
-					  $csvFile->createPages(page($uri), $titleField, $template, $update);
+        } catch (Exception $e) {
 
-					} catch(Exception $e) {
+          $messages[] = $e->getMessage();
 
-					  echo $e->getMessage();
+        }
 
-					}
+        if(isset($csvFile)) {
 
-				}
-			} else {
-				echo "You must be logged in to use this function.";
+          try {
 
-			}
-		}
- )
-));
+            $csvFile->createPages(page($uri), $titleField, $template, $update);
+
+          } catch(Exception $e) {
+
+            $messages[] = $e->getMessage();
+
+          }
+
+        }
+      } else {
+
+        $messages[] = "You must be logged in to use this function.";
+
+      }
+
+      if(!empty($messages)) {
+        $html = '';
+        foreach($messages as $message) {
+          $html .= '<div>' . $message . '</div>';
+        }
+        echo $html;
+      }
+
+    }
+  ),
+  array(
+    'pattern' => 'csv-handler/createstructure/(:all)',
+    'action' => function ($uri) {
+
+      $messages = array();
+
+      // check if user is logged in
+      // @TODO: check permissions for Kirby 2.4.0
+      if(kirby()->site()->user()) {
+
+        // get variable values from config settings, else use defaults
+        $filePath = c::get('csv-handler.filepath', __DIR__ . DS . 'examples/products.csv');
+        $delimiter = c::get('csv-handler.delimiter', ',');
+
+        $field = c::get('csv-handler.structure.field', 'items');
+        $update = c::get('csv-handler.page.append', false);
+
+        // try to instatiate an CsvHandler object
+        try {
+          $csvFile = new SonjaBroda\CsvHandler($filePath, true, $delimiter);
+
+        } catch (Exception $e) {
+
+          $messages[] = $e->getMessage();
+
+        }
+
+        if(isset($csvFile)) {
+
+          // try to create/update the structure field
+          try {
+
+            $csvFile->createStructure(page($uri), $field, $append = false);
+
+          } catch(Exception $e) {
+
+            $messages[] = $e->getMessage();
+
+          }
+
+        }
+      } else {
+
+        $messages[] = "You must be logged in to use this function.";
+
+      }
+
+      if(!empty($messages)) {
+        $html = '';
+        foreach($messages as $message) {
+          $html .= '<div>' . $message . '</div>';
+        }
+        echo $html;
+      }
+
+
+    }
+    )
+  ));

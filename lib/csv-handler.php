@@ -39,13 +39,17 @@ class CsvHandler {
   public function createPages($parent, $UIDKey, $template = 'default', $update = false) {
     $messages = array();
 
-    // Check if $UIDKey starts with a number
-    if(ctype_digit(substr($UIDKey, 0, 1))) {
-      $UIDKey = '_' . $UIDKey;
+    if(is_a($parent, 'Page')) {
+
+      $page = $parent;
+
+    } else {
+
+      $page = page($uri);
+
     }
 
-    // check if $parent exists
-    if(page($parent)) {
+    if($page) {
 
       // fetch items from CSV file
       $items = $this->getItems();
@@ -55,8 +59,13 @@ class CsvHandler {
         $data = $item;
 
 
-        // check if the index $titleKey exists
+        // check if the index $UIDKey exists
         if(isset($item[$UIDKey])) {
+
+          // Check if $UIDKey starts with a number
+          if(ctype_digit(substr($UIDKey, 0, 1))) {
+            $UIDKey = '_' . $UIDKey;
+          }
             $folderName = str::slug($item[$UIDKey]);
         } else {
           throw new Exception("The index does not exists");
@@ -105,14 +114,29 @@ class CsvHandler {
       throw new Exception("The parent page does not exist.");
 
     }
-    var_dump($messages);
+    if(!empty($messages)) {
+      $html = '';
+      foreach($messages as $message) {
+        $html .= '<div>' . $message . '</div>';
+      }
+      echo $html;
+    }
 
   }
 
-  public function createStructure($page, $field, $append = false) {
-    //todo check if string given
-    $page = page($page);
-    if(is_a($page, 'Page')) {
+  public function createStructure($uri, $field, $append = false) {
+
+    if(is_a($uri, 'Page')) {
+
+      $page = $uri;
+
+    } else {
+
+      $page = page($uri);
+
+    }
+
+    if($page) {
 
       $items = $this->getItems();
 
@@ -136,18 +160,25 @@ class CsvHandler {
         try {
 
           page($page)->update(array($field => $data));
+          $messages[] = 'Success: The field "' . $field . '" was created/updated';
 
         } catch(Exception $e) {
 
-          return 'Error: ' . $e->getMessage();
+          $messages[] = 'Error: The field "' . $field . '" could not be created/updated';
 
         }
     } else {
 
-        throw new Exception("Not a page given");
+        $messages[] = " Error: The page does not exist";
 
     }
-
+    if(!empty($messages)) {
+      $html = '';
+      foreach($messages as $message) {
+        $html .= '<div>' . $message . '</div>';
+      }
+      echo $html;
+    }
   }
 
 }
