@@ -1,65 +1,103 @@
 <?php
 namespace SonjaBroda;
 
-use CsvImporter;
 use Str;
 use Exception;
 use Yaml;
-
 
 
 class CsvHandler {
 
   private $items = array();
   private $file;
+  private $parse_header;
+  private $header;
+  private $delimiter;
+  private $length;
 
-  public function __construct($filepath, $parse_header = false, $delimiter = ',', $length='8000', $itemNo=0) {
+  function __construct($filepath, $parse_header = false, $delimiter = ',', $length='8000') {
+
     if(file_exists($filepath)) {
-      $this->file = new CsvImporter($filepath, $parse_header, $delimiter, $length);
-      $this->items = $this->file->get($itemNo);
+
+      $this->file = fopen($filepath, "r");
+      $this->parse_header = $parse_header;
+      $this->delimiter = $delimiter;
+      $this->length = $length;
+
+      if ($this->parse_header) {
+        $this->header = fgetcsv($this->file, $this->length, $this->delimiter);
+      }
     } else {
+
       throw new Exception('The file does not exist');
-
-  }
-
-  }
-
-  public function getItems() {
-
-    return $this->items;
-
-  }
-
-  public function getLabels() {
-
-    return $this->file->getHeader();
-
-  }
-
-  public function createPages($parent, $UIDKey, $template = 'default', $update = false) {
-    $messages = array();
-
-    if(is_a($parent, 'Page')) {
-
-      $page = $parent;
-
-    } else {
-
-      $page = page($parent);
 
     }
 
-    if($page) {
+  }
 
+
+  function getHeader() {
+    if($this->header) {
+      return $this->header;
+    } else {
+      return false;
+    }
+  }
+
+  function __destruct() {
+    if ($this->file) {
+      fclose($this->file);
+    }
+  }
+
+  function getItems($maxLines=0) {
+
+    //if $maxLines is set to 0, then get all the data
+
+    $data = array();
+
+    if ($maxLines > 0)
+    $lineCount = 0;
+    else
+    $lineCount = -1; // so loop limit is ignored
+
+    while ($lineCount < $maxLines && ($row = fgetcsv($this->file, $this->length, $this->delimiter)) !== false) {
+
+      if ($this->parse_header) {
+        foreach ($this->header as $i => $heading_i) {
+          $row_new[$heading_i] = $row[$i];
+        }
+        $data[] = $row_new;
+      } else {
+        $data[] = $row;
+      }
+
+      if ($maxLines > 0)
+      $lineCount++;
+    }
+    return $data;
+  }
+
+
+  public function createPages($parent, $UIDKey, $template = 'default', $update = false) {
+
+    $messages = array();
+
+    if(is_a($parent, 'Page')) {
+      $page = $parent;
+    } else {
+      $page = page($parent);
+    }
+
+    if($page) {
       // fetch items from CSV file
       $items = $this->getItems();
 
       foreach($items as $item) {
 
         $data = $item;
-
-
         // check if the index $UIDKey exists
+
         if(isset($item[$UIDKey])) {
 
           // Check if $UIDKey starts with a number
@@ -67,6 +105,7 @@ class CsvHandler {
             $UIDKey = '_' . $UIDKey;
           }
             $folderName = str::slug($item[$UIDKey]);
+
         } else {
           throw new Exception("The index does not exists");
         }
@@ -172,6 +211,54 @@ class CsvHandler {
         $messages[] = " Error: The page does not exist";
 
     }
+    if(!empty($messages)) {
+      $html = '';
+      foreach($messages as $message) {
+        $html .= '<div>' . $message . '</div>';
+      }
+      echo $html;
+    }
+  }
+
+  public function createUsers() {
+
+    $_users = $this->getItems();
+
+    $users = array();
+    foreach($_users as $user) {
+      $userName =  str::lower($user['Firstname'] . '-' . $user['Lastname']);
+      $user['firstName'] = $user['Firstname'];
+      $user['emails'] = $user['Email'];
+      $user['username'] = $userName;
+      $user['password'] = str_rot13($userName);
+      $users[] = $user;
+    }
+    foreach($users as $key => $user) {
+
+      try {
+
+        $newUser = kirby()->site()->users()->create($user);
+
+        $messages[] = 'User “'. $user['username'] .'” has been created.';
+        //$response['counterSuccess'] ++;
+      } catch(Exception $e) {
+
+        try {
+
+          $isUser = kirby()->site()->user($user['username'])->update($user);
+          $messages[] = 'User “'. $user['username'] .'” has been updated.';
+          //$response['counterUpdate'] ++;
+
+        } catch(Exception $e) {
+
+          $messages[] = 'User “'. $user['username'] .'” could not be created nor updated:' . "\n" . $e->getMessage();
+          //$response['counterFailure'] ++;
+        }
+
+      }
+
+    }
+
     if(!empty($messages)) {
       $html = '';
       foreach($messages as $message) {

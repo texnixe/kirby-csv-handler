@@ -1,7 +1,13 @@
 <?php
+
+/**
+ * Kirby Modules Plugin
+ *
+ * @author Sonja Broda <sonja@texniq.de>
+ */
+
 include __DIR__ . DS . 'routes.php';
 
-require_once __DIR__ . DS . 'csvimporter' . DS . 'csvimporter.php';
 require_once(__DIR__ . DS . 'lib' . DS . 'csv-handler.php');
 
 if (c::get('csv-handler.createpages.widget', false)) {
