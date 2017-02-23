@@ -2,7 +2,7 @@
   "name": "kirby-csv-handler",
   "description": "Provides a class for csv file handling and methods to create pages/structure field entries from a csv file.",
   "author": "Sonja Broda <sonja@texniq.de>",
-  "version": "0.1",
+  "version": "0.2",
   "type": "kirby-plugin",
   "license": "MIT"
 }

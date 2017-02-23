@@ -1,6 +1,6 @@
 # Kirby CSV Handler
 
-Version 0.1
+Version 0.2
 
 ## Installation
 
@@ -37,6 +37,37 @@ $ git submodule add https://github.com/texnixe/kirby-csv-handler site/plugins/ki
 ```
 
 ## Setup
+
+### Usage in scripts
+
+1. Create a new CsvHandler object:
+
+```
+$csv = csv($filepath, $parse_header = 'false', $delimiter = ',', $length = 8000);
+```
+
+2. Create pages or structure field
+
+```
+// create pages
+$csv->createPages($parent, $UIDKey, $template = 'default', $update = false);
+$csv->createPages('products', 'ArticleNo', $template = 'default');
+
+// create structure field
+$csv->createStructure($uri, $field, $append = false);
+```
+
+#### Parameters
+
+$parent: path to parent page
+$UIDKey: Columnname you want to use as Page UID, must be unique
+$template: template to use for new pages
+$update: set whether or not to update an existing page with the new data
+
+$uri: path to the page where the structure will be stored
+$field: name of the structure field
+$append: set whether or not to append new data, if set to false, all data will be replaced with the new data
+
 
 ### Options
 
@@ -87,13 +118,13 @@ Set this option to `true` to append all lines from the .csv file to an existing 
 The Kirby CSV-Handler Plugin currently provides two routes:
 
 ```
-csv-handler.createpages/(:all)
-csv-handler.createstructure/(:all)
+csv-handler/createpages/(:all)
+csv-handler/createstructure/(:all)
 ```
 
 where `(:all)` is the path to the parent page (in case of subpage creation)/page (in case of structure field).
 
-For example, the URL `http://example.com/csv-handler.createpages/products` will create subpages in `/content/products`, while `http://example.com/csv-handler.createstructure/products` will create/update the structure field in `/content/products`.
+For example, the URL `http://example.com/csv-handler/createpages/products` will create subpages in `/content/products`, while `http://example.com/csv-handler/createstructure/products` will create/update the structure field in `/content/products`.
 
 You must be logged in to use the routes.
 
