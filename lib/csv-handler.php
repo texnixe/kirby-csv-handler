@@ -137,6 +137,13 @@ class CsvHandler {
           try {
 
             $newPage = page($parent)->children()->create($folderName, $template, $data);
+            if(c::get('csv-handler.page.sort')) {
+              try {
+                $newPage->sort('last');
+              } catch(Exception $e) {
+                $messages[] = 'Error: The ' . $folderName . ' could not be sorted';
+              }
+            }
             $messages[] = 'Success: ' . $folderName . ' was created';
 
           } catch(Exception $e) {
