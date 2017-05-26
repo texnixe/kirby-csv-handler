@@ -14,6 +14,6 @@ function csv($filepath, $parse_header = false, $delimiter = ',', $length = 8000)
   return new SonjaBroda\CsvHandler($filepath, $parse_header, $delimiter, $length);
 }
 
-if (c::get('csv-handler.createpages.widget', false)) {
-      kirby()->set('widget', 'csv-handler.createpages', __DIR__ . DS . 'widgets' . DS . 'csv-handler.createpages');
+if(c::get('csv-handler.createpages.widget', false)) {
+  kirby()->set('widget', 'csv-handler.createpages', __DIR__ . DS . 'widgets' . DS . 'csv-handler.createpages');
 }

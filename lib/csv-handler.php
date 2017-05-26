@@ -5,6 +5,7 @@ use Str;
 use Exception;
 use Yaml;
 use C;
+use Children;
 
 
 class CsvHandler {
@@ -85,12 +86,12 @@ class CsvHandler {
     $messages = array();
 
     if(is_a($parent, 'Page')) {
-      $page = $parent;
+      $p= $parent;
     } else {
-      $page = page($parent);
+      $p = page($parent);
     }
 
-    if($page) {
+    if($p) {
       // fetch items from CSV file
       $items = $this->getItems();
 
@@ -111,13 +112,14 @@ class CsvHandler {
           throw new Exception("The index does not exists");
         }
 
-        if(page($parent)->children()->findBy('uid', $folderName)) {
-
+         // check if the UID already exists
+        if($p->children()->findBy('uid', $folderName)) {
+          // if so and if update is set to true: update the page
           if($update) {
 
             try {
 
-              page($parent)->children()->findBy('uid', $folderName)->update($data);
+              $new = page($parent)->children()->findBy('uid', $folderName)->update($data);
               $messages[] = 'Success: ' . $folderName . ' was updated';
 
               } catch(Exception $e) {
@@ -125,25 +127,37 @@ class CsvHandler {
                 $messages[] = 'Error: ' . $folderName . ' ' . $e->getMessage();
 
               }
-
+            // otherwise, throw an error
           } else {
 
             $messages[] = "The page " . $folderName . " already exists and may not be updated";
 
           }
-
+          // the page does not exist yet
         } else {
 
-          // otherwise, create a new page
+          // let's try to create a new page
           try {
+            // get the last visible page
+            $lastPage = page($parent)->children()->visible()->sortBy('sort')->last();
+            // check if lastPage is true
+            if($lastPage):
+            // then get the sorting number of the last page
+              $sortNo = $lastPage->sort();
+            // otherwise set $sortNo to 0
+            else:
+              $sortNo = 0;
+            endif;
 
+            // create the new page with the given data
             $newPage = page($parent)->children()->create($folderName, $template, $data);
-            if(c::get('csv-handler.page.sort')) {
+            // if page was successfully created and sorting is set to true, let's try to sort the page
+            if($newPage && c::get('csv-handler.page.sort')) {
               try {
-                $newPage->sort('last');
-              } catch(Exception $e) {
-                $messages[] = 'Error: The ' . $folderName . ' could not be sorted';
-              }
+          			$newPage->sort($sortNo+1);
+          		} catch(Exception $e) {
+          			$messages[] = 'Error: The ' . $folderName . ' could not be sorted';
+          		}
             }
             $messages[] = 'Success: ' . $folderName . ' was created';
 
