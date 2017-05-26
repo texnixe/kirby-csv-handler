@@ -119,7 +119,7 @@ class CsvHandler {
 
             try {
 
-              $new = page($parent)->children()->findBy('uid', $folderName)->update($data);
+              $new = $p->children()->findBy('uid', $folderName)->update($data);
               $messages[] = 'Success: ' . $folderName . ' was updated';
 
               } catch(Exception $e) {
@@ -151,6 +151,8 @@ class CsvHandler {
 
             // create the new page with the given data
             $newPage = page($parent)->children()->create($folderName, $template, $data);
+            kirby()->trigger('panel.page.create', $newPage);
+
             // if page was successfully created and sorting is set to true, let's try to sort the page
             if($newPage && c::get('csv-handler.page.sort')) {
               try {
@@ -159,6 +161,7 @@ class CsvHandler {
           			$messages[] = 'Error: The ' . $folderName . ' could not be sorted';
           		}
             }
+
             $messages[] = 'Success: ' . $folderName . ' was created';
 
           } catch(Exception $e) {
